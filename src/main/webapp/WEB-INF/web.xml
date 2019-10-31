@@ -4,4 +4,16 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+  
+  <servlet>
+  	<servlet-name>TicketCollectorServlet</servlet-name>
+  	<servlet-class>project1.servlets.TicketCollectorServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>TicketCollectorServlet</servlet-name>
+  	<url-pattern>/ticket/*</url-pattern>
+  </servlet-mapping>
 </web-app>
+

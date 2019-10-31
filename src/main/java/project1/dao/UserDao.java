@@ -112,26 +112,33 @@ public class UserDao {
 		}
 	}
 	
-	public void pushTicket(Ticket ticket) {
+	public Ticket pushTicket(Ticket ticket) {
 		try (Connection connection = ConnectionUtil.getConnection()) {
-			String sql = " INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, " + 
+			String sql = " INSERT INTO ers_reimbursement (reimb_id, reimb_amount, reimb_submitted, " + 
 				"reimb_description, reimb_receipt, " + 
 				"reimb_author, reimb_status_id, reimb_type_id) " +
-				"values (?,?,?,?,?,?,?,?,?,?)";
+				"values (?,?,?,?,?,?,?,?)";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
-			statement.setDouble(1, ticket.getAmount());
-			statement.setTimestamp(2, ticket.getDatesubmitted());
-			statement.setString(3, ticket.getDescription());
-			statement.setString(4, ticket.getImgaddr());
-			statement.setInt(5, ticket.getAuthor());
-			statement.setInt(6, ticket.getStatus());
-			statement.setInt(7, ticket.getType());
+			statement.setInt(1, genTicketID());
+			statement.setDouble(2, ticket.getAmount());
+			statement.setTimestamp(3, ticket.getDatesubmitted());
+			statement.setString(4, ticket.getDescription());
+			statement.setString(5, ticket.getImgaddr());
+			statement.setInt(6, ticket.getAuthor());
+			statement.setInt(7, ticket.getStatus());
+			statement.setInt(8, ticket.getType());
 
-			statement.executeUpdate();
+			ResultSet results = statement.executeQuery();
+			
+			if (results.next()) {
+				ticket.setId(results.getInt("id"));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+		return ticket;
 	}
 	
 	public void closeTicket(Ticket ticket, User resolver, int status) {
@@ -147,6 +154,24 @@ public class UserDao {
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public int genTicketID(){
+		String sql = "SELECT MAX(reimb_id) FROM ers_reimbursement";
+		try (Connection connection = ConnectionUtil.getConnection()) {
+			PreparedStatement statement = connection.prepareStatement(sql);
+
+			ResultSet resultset = statement.executeQuery();
+			
+
+			resultset.next();
+
+			int maxint = resultset.getInt(1);
+			return maxint + 1;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
 		}
 	}
 

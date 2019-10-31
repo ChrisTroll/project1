@@ -29,6 +29,9 @@ public class Ticket {
 		this.type = type;
 	}
 
+	public Ticket () {
+		
+	}
 	
 	public int getId() {
 		return id;
