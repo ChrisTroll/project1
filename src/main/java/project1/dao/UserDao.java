@@ -63,6 +63,23 @@ public class UserDao {
 		}
 		
 	}
+	public ArrayList<Ticket> getReviewTickets(User userin){
+		try (Connection connection = ConnectionUtil.getConnection()) {
+			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_status_id = 1 AND reimb_author != ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			
+			statement.setInt(1, userin.getUserid());
+
+			ResultSet resultSet = statement.executeQuery();
+			
+			ArrayList<Ticket> tickets = getTicketList(resultSet);
+			return tickets;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
 	
 	public static Ticket extractTicket(ResultSet resultSet) throws SQLException {	
 		int id = resultSet.getInt("reimb_id");
@@ -94,21 +111,43 @@ public class UserDao {
 			return null;
 		}
 	}
-	public ArrayList<Ticket> getReviewTickets(User userin){
+	
+	public void pushTicket(Ticket ticket) {
 		try (Connection connection = ConnectionUtil.getConnection()) {
-			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_status_id = 1 AND reimb_author != ?";
+			String sql = " INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, " + 
+				"reimb_description, reimb_receipt, " + 
+				"reimb_author, reimb_status_id, reimb_type_id) " +
+				"values (?,?,?,?,?,?,?,?,?,?)";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
-			statement.setInt(1, userin.getUserid());
+			statement.setDouble(1, ticket.getAmount());
+			statement.setTimestamp(2, ticket.getDatesubmitted());
+			statement.setString(3, ticket.getDescription());
+			statement.setString(4, ticket.getImgaddr());
+			statement.setInt(5, ticket.getAuthor());
+			statement.setInt(6, ticket.getStatus());
+			statement.setInt(7, ticket.getType());
 
-			ResultSet resultSet = statement.executeQuery();
-			
-			ArrayList<Ticket> tickets = getTicketList(resultSet);
-			return tickets;
+			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
 		}
-		
 	}
+	
+	public void closeTicket(Ticket ticket, User resolver, int status) {
+		try (Connection connection = ConnectionUtil.getConnection()) {
+			String sql = "UPDATE ers_reimbursement SET reimb_status = ?, "
+					+ "reimb_resolver = ? WHERE reimb_id = ? ";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			
+			statement.setInt(1, status);
+			statement.setInt(2, resolver.getUserid());
+			statement.setInt(3, ticket.getId());
+			
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
