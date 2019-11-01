@@ -7,12 +7,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import project1.models.Credentials;
 import project1.models.Ticket;
+import project1.models.TicketUpdateRequest;
 import project1.models.User;
 import project1.util.ConnectionUtil;
 
-public class UserDao {
-	public int checkCredentials(String username, String password){
+public class Dao {
+	public User login(Credentials cred){
 //		query database for SALT
 //		generate hash
 //		query database for username + hash combination
@@ -21,19 +23,19 @@ public class UserDao {
 			String sql = "SELECT * FROM ers_users WHERE ers_username = ? AND ers_password = ?";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
-			statement.setString(1, username);
-			statement.setString(2, password);
+			statement.setString(1, cred.getUsername());
+			statement.setString(2, cred.getPassword());
 
 			ResultSet resultSet = statement.executeQuery();
 			resultSet.next();
 			User user = extractUser(resultSet);
-			
-			return user.getUserrole();
+			return user;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 0;
+			return null;
 		}
 	}
+	
 	
 	private User extractUser(ResultSet resultSet) throws SQLException {
 		int id = resultSet.getInt("user_role_id");
@@ -81,7 +83,7 @@ public class UserDao {
 		
 	}
 	
-	public static Ticket extractTicket(ResultSet resultSet) throws SQLException {	
+	private static Ticket extractTicket(ResultSet resultSet) throws SQLException {	
 		int id = resultSet.getInt("reimb_id");
 		double amount = resultSet.getDouble("reimb_amount");
 		Timestamp datesubmitted = resultSet.getTimestamp("reimb_submitted");
@@ -141,15 +143,15 @@ public class UserDao {
 		return ticket;
 	}
 	
-	public void closeTicket(Ticket ticket, User resolver, int status) {
+	public void closeTicket(TicketUpdateRequest tur) {
 		try (Connection connection = ConnectionUtil.getConnection()) {
-			String sql = "UPDATE ers_reimbursement SET reimb_status = ?, "
+			String sql = "UPDATE ers_reimbursement SET reimb_status_id = ?, "
 					+ "reimb_resolver = ? WHERE reimb_id = ? ";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
-			statement.setInt(1, status);
-			statement.setInt(2, resolver.getUserid());
-			statement.setInt(3, ticket.getId());
+			statement.setInt(1, tur.getTicketstatus());
+			statement.setInt(2, tur.getUserid());
+			statement.setInt(3, tur.getTicketid());
 			
 			statement.executeUpdate();
 		} catch (SQLException e) {
@@ -163,7 +165,6 @@ public class UserDao {
 			PreparedStatement statement = connection.prepareStatement(sql);
 
 			ResultSet resultset = statement.executeQuery();
-			
 
 			resultset.next();
 
@@ -172,6 +173,23 @@ public class UserDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return 0;
+		}
+	}
+	
+	public Ticket pullTicket(int ticketid) {
+		try (Connection connection = ConnectionUtil.getConnection()){
+			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_id = ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setInt(1, ticketid);
+			ResultSet resultset = statement.executeQuery();
+			
+			resultset.next();
+			
+			Ticket ticket = extractTicket(resultset);
+			return ticket;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 

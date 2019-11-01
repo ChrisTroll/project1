@@ -11,9 +11,52 @@
   	<load-on-startup>1</load-on-startup>
   </servlet>
   
+  <servlet>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<servlet-class>project1.servlets.LoginServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+  	<servlet-name>ViewTicketServlet</servlet-name>
+  	<servlet-class>project1.servlets.ViewTicketServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+  	<servlet-name>TicketUpdateServlet</servlet-name>
+  	<servlet-class>project1.servlets.TicketUpdateServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+  	<servlet-name>ReviewTicketServlet</servlet-name>
+  	<servlet-class>project1.servlets.ReviewTicketServlet</servlet-class>
+  	<load-on-startup>1</load-on-startup>
+  </servlet>
+  
   <servlet-mapping>
   	<servlet-name>TicketCollectorServlet</servlet-name>
   	<url-pattern>/ticket/*</url-pattern>
   </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<url-pattern>/login/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>ViewTicketServlet</servlet-name>
+  	<url-pattern>/pastview/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>TicketUpdateServlet</servlet-name>
+  	<url-pattern>/update/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>ReviewTicketServlet</servlet-name>
+  	<url-pattern>/review/*</url-pattern>
+  </servlet-mapping>
 </web-app>
-

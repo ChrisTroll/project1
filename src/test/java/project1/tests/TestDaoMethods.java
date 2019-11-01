@@ -4,20 +4,20 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import project1.dao.UserDao;
+import project1.dao.Dao;
 import project1.models.Ticket;
 import project1.models.User;
 
 public class TestDaoMethods {
-	UserDao dao = new UserDao();
+	Dao dao = new Dao();
 	User testuser = new User("BananaBatman", "batman", 1, 1);
 	User testuser2 = new User("CherryRobin", "robin", 2, 2);
 	
-	@Test
-	public void testAcctNumExists() {
-		//this is a test account
-		assert(dao.checkCredentials("BananaBatman", "batman") == 1);
-	}
+//	@Test
+//	public void testAcctNumExists() {
+//		//this is a test account
+//		assert(dao.checkCredentials("BananaBatman", "batman") == 1);
+//	}
 	
 	@Test
 	public void testGetTickets() {

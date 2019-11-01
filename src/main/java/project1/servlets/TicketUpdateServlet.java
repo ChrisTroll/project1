@@ -10,12 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import project1.models.Ticket;
+import project1.models.TicketUpdateRequest;
 import project1.services.TicketService;
 
-public class TicketCollectorServlet extends HttpServlet{
-	/**
-	 * 
-	 */
+public class TicketUpdateServlet extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	TicketService tserv = new TicketService();
 	
@@ -30,17 +28,20 @@ public class TicketCollectorServlet extends HttpServlet{
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-				throws ServletException, IOException {
-		System.out.println("Attempting Ticket Write...");
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("Attempting Ticket Update...");
+		
 		ObjectMapper om = new ObjectMapper();
+		TicketUpdateRequest tur = om.readValue(request.getReader(), TicketUpdateRequest.class);
 		
-		Ticket ticket = om.readValue(request.getReader(), Ticket.class);
+		tserv.closeTicket(tur);
+		Ticket ticket = tserv.getTicket(tur.getTicketid());
+		
 
-		ticket = tserv.submit(ticket);
-		response.setStatus(201); 
 		om.writeValue(response.getWriter(), ticket);
+		response.setStatus(201); 
 		
-		System.out.println("End Ticket Write Attempt...");
+		System.out.println("Ticket Update Successful...");
+		super.doPost(request, response);
 	}
 }

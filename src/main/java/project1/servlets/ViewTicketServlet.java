@@ -1,6 +1,7 @@
 package project1.servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,13 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import project1.models.Ticket;
+import project1.models.User;
 import project1.services.TicketService;
 
-public class TicketCollectorServlet extends HttpServlet{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class ViewTicketServlet extends HttpServlet{
+	private static final long serialVersionUID = 2L;
 	TicketService tserv = new TicketService();
 	
 	@Override
@@ -30,17 +29,19 @@ public class TicketCollectorServlet extends HttpServlet{
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-				throws ServletException, IOException {
-		System.out.println("Attempting Ticket Write...");
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("Attempting Ticket Array Read...");
+		
 		ObjectMapper om = new ObjectMapper();
+		User user = om.readValue(request.getReader(), User.class);
 		
-		Ticket ticket = om.readValue(request.getReader(), Ticket.class);
-
-		ticket = tserv.submit(ticket);
+		ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+		tickets = tserv.viewPastTickets(user);
+		
 		response.setStatus(201); 
-		om.writeValue(response.getWriter(), ticket);
+		om.writeValue(response.getWriter(), tickets);
+		super.doGet(request, response);
 		
-		System.out.println("End Ticket Write Attempt...");
+		System.out.println("Finished Ticket Array Read...");
 	}
 }

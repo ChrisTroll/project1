@@ -14,6 +14,9 @@ public class User {
 		this.userrole = userrole;
 		this.userid = userid;
 	}
+
+	public User() {
+	}
 	
 	public String getUsername() {
 		return username;
