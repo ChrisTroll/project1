@@ -14,7 +14,7 @@ import project1.models.TicketUpdateRequest;
 import project1.services.TicketService;
 
 public class TicketUpdateServlet extends HttpServlet{
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 4L;
 	TicketService tserv = new TicketService();
 	
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

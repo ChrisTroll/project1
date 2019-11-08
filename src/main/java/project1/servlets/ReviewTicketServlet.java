@@ -49,7 +49,6 @@ public class ReviewTicketServlet extends HttpServlet{
 		
 		response.setStatus(201); 
 		om.writeValue(response.getWriter(), tickets);
-		super.doGet(request, response);
 		
 		System.out.println("Finished Ticket Array Read...");
 	}

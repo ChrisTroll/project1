@@ -50,7 +50,7 @@ public class Dao {
 	
 	public ArrayList<Ticket> getPastTickets(User userin){
 		try (Connection connection = ConnectionUtil.getConnection()) {
-			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_author = ? AND reimb_status_id = 2";
+			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_author = ? AND reimb_status_id IN (2,3)";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
 			statement.setInt(1, userin.getUserid());
@@ -67,7 +67,7 @@ public class Dao {
 	}
 	public ArrayList<Ticket> getReviewTickets(User userin){
 		try (Connection connection = ConnectionUtil.getConnection()) {
-			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_status_id = 1 AND reimb_author ?= ?";
+			String sql = "SELECT * FROM ers_reimbursement WHERE reimb_status_id = 1 AND reimb_author != ?";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
 			statement.setInt(1, userin.getUserid());
