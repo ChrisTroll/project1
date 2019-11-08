@@ -18,6 +18,15 @@ public class ViewTicketServlet extends HttpServlet{
 	private static final long serialVersionUID = 2L;
 	TicketService tserv = new TicketService();
 	
+	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		// Add CORS headers
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "content-type");
+		super.service(request, response);
+		
+	}
+	
 	@Override
 	public void init() throws ServletException {
 		try {
@@ -29,7 +38,7 @@ public class ViewTicketServlet extends HttpServlet{
 	}
 	
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Attempting Ticket Array Read...");
 		
 		ObjectMapper om = new ObjectMapper();
@@ -38,10 +47,8 @@ public class ViewTicketServlet extends HttpServlet{
 		ArrayList<Ticket> tickets = new ArrayList<Ticket>();
 		tickets = tserv.viewPastTickets(user);
 		
-		response.setStatus(201); 
 		om.writeValue(response.getWriter(), tickets);
-		super.doGet(request, response);
-		
+		response.setStatus(201); 
 		System.out.println("Finished Ticket Array Read...");
 	}
 }

@@ -17,6 +17,15 @@ public class LoginServlet extends HttpServlet{
 	private static final long serialVersionUID = 12;
 	LoginService lserv = new LoginService();
 	
+	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		// Add CORS headers
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "content-type");
+		super.service(request, response);
+		
+	}
+	
 	@Override
 	public void init() throws ServletException {
 		try {
@@ -24,11 +33,12 @@ public class LoginServlet extends HttpServlet{
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		
 		super.init();
 	}
 	
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Attempting Login...");
 		ObjectMapper om = new ObjectMapper();
 		

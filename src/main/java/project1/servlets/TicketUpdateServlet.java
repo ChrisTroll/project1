@@ -17,6 +17,15 @@ public class TicketUpdateServlet extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	TicketService tserv = new TicketService();
 	
+	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		// Add CORS headers
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "content-type");
+		super.service(request, response);
+		
+	}
+	
 	@Override
 	public void init() throws ServletException {
 		try {
@@ -42,6 +51,5 @@ public class TicketUpdateServlet extends HttpServlet{
 		response.setStatus(201); 
 		
 		System.out.println("Ticket Update Successful...");
-		super.doPost(request, response);
 	}
 }
