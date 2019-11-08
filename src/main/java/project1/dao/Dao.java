@@ -1,11 +1,19 @@
 package project1.dao;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import project1.models.Credentials;
 import project1.models.Ticket;
@@ -14,17 +22,21 @@ import project1.models.User;
 import project1.util.ConnectionUtil;
 
 public class Dao {
+	Date date = new Date();
+	
 	public User login(Credentials cred){
 //		query database for SALT
 //		generate hash
 //		query database for username + hash combination
 		//TODO Extract SALT Value, generate HASH
 		try (Connection connection = ConnectionUtil.getConnection()) {
+			//fetch salt 
+			byte [] hash = getHash(cred);
 			String sql = "SELECT * FROM ers_users WHERE ers_username = ? AND ers_password = ?";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
 			statement.setString(1, cred.getUsername());
-			statement.setString(2, cred.getPassword());
+			statement.setBytes(2, hash);
 
 			ResultSet resultSet = statement.executeQuery();
 			resultSet.next();
@@ -36,14 +48,52 @@ public class Dao {
 		}
 	}
 	
+	private byte[] getHash(Credentials cred) {
+		try (Connection connection = ConnectionUtil.getConnection()) {
+			String sql = "SELECT ers_salt FROM ers_users WHERE ers_username = ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setString(1,  cred.getUsername());
+			ResultSet resultSet = statement.executeQuery();
+		
+			resultSet.next();
+			byte[] salt = resultSet.getBytes(1);
+		
+			KeySpec spec = new PBEKeySpec(cred.getPassword().toCharArray(), salt, 65536, 128);
+			SecretKeyFactory factory;
+			factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			byte[] hash = factory.generateSecret(spec).getEncoded();
+			return hash;
+			
+			} catch (SQLException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	
+	public void pushHash(int id, Credentials cred) {
+		byte[] hash = getHash(cred);
+		try (Connection connection = ConnectionUtil.getConnection()) {
+			String sql = "UPDATE ers_users SET ers_password = ? WHERE ers_username = ?";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setBytes(1, hash);
+			statement.setString(2,  cred.getUsername());
+			
+			statement.executeUpdate();
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
 	
 	private User extractUser(ResultSet resultSet) throws SQLException {
 		int id = resultSet.getInt("user_role_id");
 		int userid = resultSet.getInt("ers_users_id");
 		String username = resultSet.getString("ers_username");
-		String password = resultSet.getString("ers_password");
 		
-		User user = new User(username, password, id, userid);
+		User user = new User(username, id, userid);
 		
 		return user;
 	}
@@ -146,12 +196,13 @@ public class Dao {
 	public void closeTicket(TicketUpdateRequest tur) {
 		try (Connection connection = ConnectionUtil.getConnection()) {
 			String sql = "UPDATE ers_reimbursement SET reimb_status_id = ?, "
-					+ "reimb_resolver = ? WHERE reimb_id = ? ";
+					+ "reimb_resolver = ?, reimb_resolved = ? WHERE reimb_id = ? ";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			
 			statement.setInt(1, tur.getTicketstatus());
 			statement.setInt(2, tur.getUserid());
-			statement.setInt(3, tur.getTicketid());
+			statement.setTimestamp(3, new Timestamp(date.getTime()));
+			statement.setInt(4, tur.getTicketid());
 			
 			statement.executeUpdate();
 		} catch (SQLException e) {
@@ -190,6 +241,22 @@ public class Dao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	public void pushSalt(int id) {
+		try (Connection connection = ConnectionUtil.getConnection()){
+			SecureRandom random = new SecureRandom();
+			byte[] salt = new byte[20];
+			random.nextBytes(salt);
+			
+			String sql = "UPDATE ers_users SET ers_salt = ? WHERE ers_users_id = ? ";
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setBytes(1, salt);
+			statement.setInt(2, id);
+			statement.executeUpdate();
+		} catch (SQLException e){
+			e.printStackTrace();
 		}
 	}
 
